@@ -20,4 +20,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     @Query("SELECT i FROM Item i WHERE i.itemCode = :itemCode AND i.availableQuantity > 0 ORDER BY i.price ASC")
     List<Item> findItemsByItemCodeOrderByPrice(@Param("itemCode") String itemCode);
+
+    Optional<Item> findByItemCode(String itemCode);
 }
