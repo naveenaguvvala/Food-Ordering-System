@@ -4,13 +4,15 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter
-@Setter
+
 public class ItemDTO {
 
     private String itemName;
 
-    private int res_id;
+    private String itemCode;
 
-    private double price;
-
+    public ItemDTO(String itemName, String itemCode) {
+        this.itemName = itemName;
+        this.itemCode = itemCode;
+    }
 }

@@ -1,11 +1,10 @@
 package com.example.foodorderingsystem.Entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,12 +13,17 @@ import lombok.Setter;
 public class Order {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false)
     private int orderId;
 
-//    private Map<Item, Integer> items;
+    @OneToMany(mappedBy = "itemCode", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Item> items; //Can be improved with quantity
+
+    @ManyToOne
+    @JoinColumn(name="user_id", referencedColumnName = "userId")
+    private User user;
 
     @Column(nullable = false)
-    private int userId;
-
     private String status;
 }

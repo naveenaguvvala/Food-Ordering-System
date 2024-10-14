@@ -1,14 +1,19 @@
 package com.example.foodorderingsystem.controller;
 
-import com.example.foodorderingsystem.DTOs.RestaurantDTO;
+import com.example.foodorderingsystem.DTOs.ItemDTO;
 import com.example.foodorderingsystem.Entity.Item;
 import com.example.foodorderingsystem.Entity.Restaurant;
-import com.example.foodorderingsystem.Repository.RestaurantRepository;
 import com.example.foodorderingsystem.Service.RestaurantService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class RestaurantController {
@@ -17,29 +22,54 @@ public class RestaurantController {
     @Autowired
     RestaurantService restaurantService;
 
+    Logger logger = LoggerFactory.getLogger(RestaurantController.class);
+
     @PostMapping("/createRestaurant")
-    public ResponseEntity<String> register(@RequestBody RestaurantDTO restaurant) {
+    public ResponseEntity<Object> register(@RequestBody Restaurant restaurant) {
         try{
             restaurantService.registerRestaurant(restaurant);
-            return ResponseEntity.ok("Restaurant registered successfully");
+            return ResponseEntity.status(HttpStatus.CREATED).body(restaurant);
         }
         catch(Exception e){
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+            logger.error("Restaurant creation failed - " + e.getMessage());
         }
+        return ResponseEntity.status(HttpStatus.CONFLICT).body("Restaurant Already Exists");
+    }
+    @GetMapping("/items")
+    public ResponseEntity<List<ItemDTO >> getItems() {
+        List<ItemDTO> items = restaurantService.getAllItems();
+
+        if(!items.isEmpty()){
+            return ResponseEntity.status(HttpStatus.OK).body(items);
+        }
+        else
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(items);
     }
 
     @PostMapping("/items")
     public ResponseEntity<Item> addItem(@RequestBody Item item) {
-        //If item_id already exists, return
-        //Else put it in DB and return 200
-        return ResponseEntity.status(HttpStatus.CREATED).body(item);
+        try {
+                restaurantService.addItemToRestaurant(item);
+                return ResponseEntity.status(HttpStatus.CREATED).body(item);
+        }
+        catch(IllegalArgumentException e){
+            logger.error("Item addition failed - " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        catch(Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @PatchMapping("/items")
     public ResponseEntity<Item> updateItem(@RequestBody Item item) {
-        // Add Validation - if Item doesn't exist, then return some exception
-        // Else update the DB object and put back into Table
-        return ResponseEntity.status(HttpStatus.CREATED).body(item);
+        try {
+            restaurantService.updateItem(item);
+            return ResponseEntity.ok().body(item);
+        }
+        catch(IllegalArgumentException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(item);
+        }
     }
 
     @DeleteMapping("/items")
