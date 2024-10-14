@@ -4,6 +4,7 @@ import com.example.foodorderingsystem.DTOs.ItemDTO;
 import com.example.foodorderingsystem.Entity.Item;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,4 +17,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     List<ItemDTO> findDistinctByItemName();
 
     Optional<Item> findByRestaurant_RestaurantIdAndItemCode(Long restaurantId, String itemCode);
+
+    @Query("SELECT i FROM Item i WHERE i.itemCode = :itemCode AND i.availableQuantity > 0 ORDER BY i.price ASC")
+    List<Item> findItemsByItemCodeOrderByPrice(@Param("itemCode") String itemCode);
 }

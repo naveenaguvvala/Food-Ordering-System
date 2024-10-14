@@ -2,6 +2,7 @@ package com.example.foodorderingsystem.controller;
 
 import com.example.foodorderingsystem.DTOs.ItemDTO;
 import com.example.foodorderingsystem.DTOs.OrderDTO;
+import com.example.foodorderingsystem.DTOs.OrderItemDTO;
 import com.example.foodorderingsystem.Entity.Item;
 import com.example.foodorderingsystem.Entity.Order;
 import com.example.foodorderingsystem.Service.OrderService;
@@ -27,16 +28,12 @@ public class OrderController {
         @PostMapping("/placeOrder")
         public ResponseEntity<Object> placeOrder(@RequestBody List<OrderDTO> orderDTOList) {
                 try {
-                        List<Item> items = orderService.fetchItemsByItemCode(orderDTOList);
-                        if(!orderService.areAllItemCodesPresent(items)) {
-                                return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("Order can't be placed due to invalid Items");
-                        }
+                        List<OrderItemDTO> orderItems = orderService.processOrder(orderDTOList);
+                        return ResponseEntity.status(HttpStatus.CREATED).body(orderItems);
                 }
                 catch (Exception e) {
-
+                        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
                 }
-                 //Core Logic
-                return ResponseEntity.ok("Success");
         }
 
         @GetMapping("/orders/{userId}")
