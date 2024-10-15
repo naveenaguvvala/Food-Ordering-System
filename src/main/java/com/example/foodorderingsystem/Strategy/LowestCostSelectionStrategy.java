@@ -5,6 +5,7 @@ import com.example.foodorderingsystem.DTOs.OrderItemDTO;
 import com.example.foodorderingsystem.Entity.Item;
 import com.example.foodorderingsystem.Repository.ItemRepository;
 import com.example.foodorderingsystem.Service.KafkaProducerService;
+import com.example.foodorderingsystem.constants.ItemType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -40,21 +41,21 @@ public class LowestCostSelectionStrategy implements RestaurantSelectionStrategy{
                 itemRepository.save(item);  // Update the item in the database
 
                 // Add to the final order
-                orderItems.add(new OrderItemDTO(itemCode, restaurantId, remainingQuantity, 300));
+                orderItems.add(new OrderItemDTO(itemCode, restaurantId, remainingQuantity, item.getItemName()));
                 kafkaProducerService.sendPreparationEvent(
                         itemCode,
                         restaurantId,
                         remainingQuantity,
-                        10000L);
+                        (long)ItemType.valueOf(itemCode.toUpperCase()).getPreparationTime()*60*1000);
                 remainingQuantity = 0;
             } else {
                 // Take all available stock from this restaurant and move to the next
-                orderItems.add(new OrderItemDTO(itemCode, restaurantId, availableQuantity, 300));
+                orderItems.add(new OrderItemDTO(itemCode, restaurantId, availableQuantity, item.getItemName()));
                 kafkaProducerService.sendPreparationEvent(
                         itemCode,
                         restaurantId,
-                        remainingQuantity,
-                        3000L);
+                        availableQuantity,
+                        (long)ItemType.valueOf(itemCode.toUpperCase()).getPreparationTime()*60*1000);
                 remainingQuantity -= availableQuantity;
                 item.setAvailableQuantity(0);  // All stock is taken
                 itemRepository.save(item);  // Update the item in the database

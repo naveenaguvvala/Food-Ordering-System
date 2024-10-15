@@ -12,5 +12,5 @@ public class OrderItemDTO {
 
     private int quantity;
 
-    private long preparation_time;
+    private String itemName;
 }

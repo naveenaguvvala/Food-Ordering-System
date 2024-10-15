@@ -4,17 +4,22 @@ import com.example.foodorderingsystem.Entity.Item;
 import com.example.foodorderingsystem.Repository.ItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.stereotype.Service;
-import org.springframework.util.backoff.FixedBackOff;
 
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class KafkaConsumerService {
 
     @Autowired
     private ItemRepository itemRepository;
+
+    // Define a ScheduledExecutorService with a fixed thread pool (can be adjusted)
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(10);
+
 
     @KafkaListener(topics = "item-preparation", groupId = "group_id")
     public void consume(Map<String, Object> message) {
@@ -23,19 +28,20 @@ public class KafkaConsumerService {
         long preparationTime = ((Number) message.get("preparationTime")).longValue();
         long restaurantId = ((Number) message.get("restaurantId")).longValue();
 
-        // Simulate the preparation time delay (e.g., wait for the specified time)
-        try {
-            Thread.sleep(preparationTime);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        scheduler.schedule(() -> processItemPreparation(itemCode, quantity, restaurantId),
+                preparationTime, TimeUnit.MILLISECONDS);
+    }
 
-        // After preparation time, release the quantity
+    private void processItemPreparation(String itemCode, int quantity, long restaurantId) {
+        // Fetch the item from the repository
         Item item = itemRepository.findByRestaurant_RestaurantIdAndItemCode(restaurantId, itemCode)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found"));
 
+        // Update the available quantity
         item.setAvailableQuantity(item.getAvailableQuantity() + quantity);
-        itemRepository.save(item);  // Update the item's available quantity
+
+        // Save the updated item back to the database
+        itemRepository.save(item);
     }
 }
 
