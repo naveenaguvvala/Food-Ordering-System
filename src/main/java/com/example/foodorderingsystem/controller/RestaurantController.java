@@ -35,6 +35,7 @@ public class RestaurantController {
         }
         return ResponseEntity.status(HttpStatus.CONFLICT).body("Restaurant Already Exists");
     }
+
     @GetMapping("/items")
     public ResponseEntity<List<ItemDTO >> getItems() {
         List<ItemDTO> items = restaurantService.getAllItems();
@@ -52,12 +53,9 @@ public class RestaurantController {
                 restaurantService.addItemToRestaurant(item);
                 return ResponseEntity.status(HttpStatus.CREATED).body(item);
         }
-        catch(IllegalArgumentException e){
+        catch(Exception e){
             logger.error("Item addition failed - " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-        catch(Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 

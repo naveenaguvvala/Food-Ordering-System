@@ -3,7 +3,10 @@ package com.example.foodorderingsystem.Strategy;
 import com.example.foodorderingsystem.DTOs.OrderDTO;
 import com.example.foodorderingsystem.DTOs.OrderItemDTO;
 import com.example.foodorderingsystem.Entity.Item;
+import com.example.foodorderingsystem.Entity.Restaurant;
 import com.example.foodorderingsystem.Repository.ItemRepository;
+import com.example.foodorderingsystem.Repository.RestaurantRepository;
+import com.example.foodorderingsystem.Service.ItemCacheService;
 import com.example.foodorderingsystem.Service.KafkaProducerService;
 import com.example.foodorderingsystem.constants.ItemType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +20,13 @@ import java.util.List;
 public class LowestCostSelectionStrategy implements RestaurantSelectionStrategy{
 
     @Autowired
-    private ItemRepository itemRepository;
+    private KafkaProducerService kafkaProducerService;
 
     @Autowired
-    private KafkaProducerService kafkaProducerService;
+    private RestaurantRepository restaurantRepository;
+
+    @Autowired
+    private ItemCacheService itemCacheService;
 
     @Override
     public List<OrderItemDTO> placeOrder(OrderDTO orderDTO, List<Item> availableItems, String itemCode) {
@@ -32,18 +38,18 @@ public class LowestCostSelectionStrategy implements RestaurantSelectionStrategy{
                 break; // The required quantity has been fulfilled
             }
 
-            int availableQuantity = item.getAvailableQuantity();
-            Long restaurantId = item.getRestaurant().getRestaurantId();
+            Restaurant restaurant = item.getRestaurant();
+            Long restaurantId = restaurant.getRestaurantId();
+            int availableQuantity = restaurant.getMaxCapacity();
 
             if (availableQuantity >= remainingQuantity) {
                 // Fulfill the remaining quantity from this restaurant
-                item.setAvailableQuantity(availableQuantity - remainingQuantity);
-                itemRepository.save(item);  // Update the item in the database
+                restaurant.setMaxCapacity(availableQuantity - remainingQuantity);
+                restaurantRepository.save(restaurant); // Update the Restaurant in the database
 
                 // Add to the final order
                 orderItems.add(new OrderItemDTO(itemCode, restaurantId, remainingQuantity, item.getItemName()));
                 kafkaProducerService.sendPreparationEvent(
-                        itemCode,
                         restaurantId,
                         remainingQuantity,
                         (long)ItemType.valueOf(itemCode.toUpperCase()).getPreparationTime()*60*1000);
@@ -52,13 +58,12 @@ public class LowestCostSelectionStrategy implements RestaurantSelectionStrategy{
                 // Take all available stock from this restaurant and move to the next
                 orderItems.add(new OrderItemDTO(itemCode, restaurantId, availableQuantity, item.getItemName()));
                 kafkaProducerService.sendPreparationEvent(
-                        itemCode,
                         restaurantId,
                         availableQuantity,
                         (long)ItemType.valueOf(itemCode.toUpperCase()).getPreparationTime()*60*1000);
                 remainingQuantity -= availableQuantity;
-                item.setAvailableQuantity(0);  // All stock is taken
-                itemRepository.save(item);  // Update the item in the database
+                restaurant.setMaxCapacity(0);  // All stock is taken
+                restaurantRepository.save(restaurant);  // Update the item in the database
             }
         }
 

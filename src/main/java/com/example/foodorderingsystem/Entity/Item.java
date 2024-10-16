@@ -1,12 +1,15 @@
 package com.example.foodorderingsystem.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.data.redis.core.RedisHash;
 
+import java.io.Serializable;
 import java.util.Date;
 
 @Getter
@@ -16,7 +19,8 @@ import java.util.Date;
 @Table(name = "item", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"itemCode", "restaurant_id"})
 })
-public class Item {
+@JsonSerialize
+public class Item implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
@@ -35,9 +39,6 @@ public class Item {
     @JoinColumn(name="restaurant_id", referencedColumnName = "restaurantId")
     private Restaurant restaurant;
 
-    @Column(nullable = false)
-    private int availableQuantity;
-
     @CreatedDate
     @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false, updatable = false)
@@ -47,4 +48,7 @@ public class Item {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false)
     private Date updatedAt;
+
+    @Version
+    private Integer version;
 }

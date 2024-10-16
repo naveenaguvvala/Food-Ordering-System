@@ -1,7 +1,9 @@
 package com.example.foodorderingsystem.Service;
 
 import com.example.foodorderingsystem.Entity.Item;
+import com.example.foodorderingsystem.Entity.Restaurant;
 import com.example.foodorderingsystem.Repository.ItemRepository;
+import com.example.foodorderingsystem.Repository.RestaurantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
@@ -15,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 public class KafkaConsumerService {
 
     @Autowired
-    private ItemRepository itemRepository;
+    private RestaurantRepository restaurantRepository;
 
     // Define a ScheduledExecutorService with a fixed thread pool (can be adjusted)
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(10);
@@ -23,25 +25,26 @@ public class KafkaConsumerService {
 
     @KafkaListener(topics = "item-preparation", groupId = "group_id")
     public void consume(Map<String, Object> message) {
-        String itemCode = (String) message.get("itemId");
         int quantity = (int) message.get("quantity");
         long preparationTime = ((Number) message.get("preparationTime")).longValue();
         long restaurantId = ((Number) message.get("restaurantId")).longValue();
 
-        scheduler.schedule(() -> processItemPreparation(itemCode, quantity, restaurantId),
+        scheduler.schedule(() -> processItemPreparation(quantity, restaurantId),
                 preparationTime, TimeUnit.MILLISECONDS);
     }
 
-    private void processItemPreparation(String itemCode, int quantity, long restaurantId) {
-        // Fetch the item from the repository
-        Item item = itemRepository.findByRestaurant_RestaurantIdAndItemCode(restaurantId, itemCode)
-                .orElseThrow(() -> new IllegalArgumentException("Item not found"));
+    private void processItemPreparation(int quantity, long restaurantId) {
+        // Fetch the Restaurant from the repository
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new IllegalArgumentException("Restaurant not found"));
 
         // Update the available quantity
-        item.setAvailableQuantity(item.getAvailableQuantity() + quantity);
+        restaurant.setMaxCapacity(restaurant.getMaxCapacity() + quantity);
 
-        // Save the updated item back to the database
-        itemRepository.save(item);
+        System.out.println("Request Received");
+
+        // Save the updated restaurant back to the database
+        restaurantRepository.save(restaurant);
     }
 }
 

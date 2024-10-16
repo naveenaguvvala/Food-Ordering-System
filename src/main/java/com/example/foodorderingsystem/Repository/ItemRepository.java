@@ -18,7 +18,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     Optional<Item> findByRestaurant_RestaurantIdAndItemCode(Long restaurantId, String itemCode);
 
-    @Query("SELECT i FROM Item i WHERE i.itemCode = :itemCode AND i.availableQuantity > 0 ORDER BY i.price ASC")
+    @Query("SELECT i FROM Item i WHERE i.itemCode = :itemCode ORDER BY i.price ASC")
     List<Item> findItemsByItemCodeOrderByPrice(@Param("itemCode") String itemCode);
 
     Optional<Item> findByItemCode(String itemCode);

@@ -15,9 +15,8 @@ public class KafkaProducerService {
     @Autowired
     private KafkaTemplate<String, Object> kafkaTemplate;
 
-    public void sendPreparationEvent(String itemCode, long restaurantId, int quantity, long preparationTime) {
+    public void sendPreparationEvent(long restaurantId, int quantity, long preparationTime) {
         Map<String, Object> message = new HashMap<>();
-        message.put("itemId", itemCode);
         message.put("restaurantId", restaurantId);
         message.put("quantity", quantity);
         message.put("preparationTime", preparationTime);

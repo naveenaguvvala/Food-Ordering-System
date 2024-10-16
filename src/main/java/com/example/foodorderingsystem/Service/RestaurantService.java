@@ -20,6 +20,9 @@ public class RestaurantService {
     @Autowired
     private ItemRepository itemRepository;
 
+    @Autowired
+    private ItemCacheService itemCacheService;
+
     public Restaurant registerRestaurant(Restaurant restaurant) {
         // Check if restaurant already exists by name
         if (restaurantRepository.existsByEmail(restaurant.getEmail())) {
@@ -48,10 +51,9 @@ public class RestaurantService {
             // Update the fields of the existing item
             existingItem.setItemName(newItemData.getItemName());
             existingItem.setPrice(newItemData.getPrice());
-            existingItem.setAvailableQuantity(newItemData.getAvailableQuantity());
 
             // Save the updated item
-            itemRepository.save(existingItem);
+            itemCacheService.updateItem(existingItem);
         }
         else {
             throw new IllegalArgumentException("Item with id " + newItemData.getRestaurant().getRestaurantId() + " does not exist");

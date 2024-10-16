@@ -17,7 +17,7 @@ import java.util.List;
 public class OrderService {
 
     @Autowired
-    ItemRepository itemRepository;
+    ItemCacheService itemCacheService;
 
     @Autowired
     RestaurantSelectionStrategy restaurantSelectionStrategy;
@@ -49,7 +49,7 @@ public class OrderService {
             String itemCode = orderDTO.getItemDTO().getItemCode();
 
             // Fetch items for the given itemCode, ordered by price (ascending)
-            List<Item> availableItems = itemRepository.findItemsByItemCodeOrderByPrice(itemCode);
+            List<Item> availableItems = itemCacheService.findItemsByItemCode(itemCode);
 
             if (availableItems.isEmpty()) {
                 throw new IllegalArgumentException("Item with code " + itemCode + " is not available in any restaurant.");
