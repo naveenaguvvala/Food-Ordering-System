@@ -22,25 +22,6 @@ public class OrderService {
     @Autowired
     RestaurantSelectionStrategy restaurantSelectionStrategy;
 
-//    private Set<String> itemCodes;
-//
-//    public List<Item> fetchItemsByItemCode(List<OrderDTO> order) {
-//        return orderRepository.findItemsByItemCodes(extractItemCodes(order));
-//    }
-//
-//    private Set<String> extractItemCodes(List<OrderDTO> order) {
-//         itemCodes = order.stream()
-//                .map(OrderDTO::getItemDTO)
-//                .map(ItemDTO::getItemCode)
-//                .collect(Collectors.toSet());
-//        return itemCodes;
-//    }
-//
-//    public boolean areAllItemCodesPresent(List<Item> DbItems) {
-//        Set<String> DBItemCodes = DbItems.stream().map(Item::getItemCode).collect(Collectors.toSet());
-//        return DBItemCodes.containsAll(itemCodes);
-//    }
-
     @Transactional
     public List<OrderItemDTO> processOrder(List<OrderDTO> orderDTOList) {
         List<OrderItemDTO> orderItems = new ArrayList<>();

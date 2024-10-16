@@ -15,6 +15,9 @@ import java.util.Date;
 @Getter
 @Setter
 @Entity
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "item", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"itemCode", "restaurant_id"})
@@ -48,7 +51,4 @@ public class Item implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false)
     private Date updatedAt;
-
-    @Version
-    private Integer version;
 }
