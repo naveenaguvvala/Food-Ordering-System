@@ -36,7 +36,7 @@ public class RestaurantService {
         if(!restaurantRepository.existsById(item.getRestaurant().getRestaurantId())) {
             throw new IllegalArgumentException("Restaurant with id " + item.getRestaurant().getRestaurantId() + " does not exist");
         }
-        itemRepository.save(item);
+        itemCacheService.addOrUpdateItem(item);
     }
 
     public List<ItemDTO> getAllItems() {
@@ -53,7 +53,7 @@ public class RestaurantService {
             existingItem.setPrice(newItemData.getPrice());
 
             // Save the updated item
-            itemCacheService.updateItem(existingItem);
+            itemCacheService.addOrUpdateItem(existingItem);
         }
         else {
             throw new IllegalArgumentException("Item with id " + newItemData.getRestaurant().getRestaurantId() + " does not exist");

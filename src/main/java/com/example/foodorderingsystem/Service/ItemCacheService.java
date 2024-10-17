@@ -4,7 +4,6 @@ import com.example.foodorderingsystem.Entity.Item;
 import com.example.foodorderingsystem.Repository.ItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +26,7 @@ public class ItemCacheService {
 
     // Method to evict or refresh cache after updating item quantity
     @CacheEvict(value = "itemsCache", key = "#item.itemCode")
-    public void updateItem(Item item) {
+    public void addOrUpdateItem(Item item) {
          itemRepository.save(item);
     }
 
