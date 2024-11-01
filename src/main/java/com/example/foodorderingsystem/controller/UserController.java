@@ -1,7 +1,7 @@
 package com.example.foodorderingsystem.controller;
 
+import com.example.foodorderingsystem.DTOs.UserDTO;
 import com.example.foodorderingsystem.Entity.User;
-import com.example.foodorderingsystem.Service.RestaurantService;
 import com.example.foodorderingsystem.Service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,11 +20,11 @@ public class UserController {
     UserService userService;
 
     Logger logger = LoggerFactory.getLogger(RestaurantController.class);
-    @PostMapping("/login")
-    public ResponseEntity<Object> register(@RequestBody User user) {
+    @PostMapping("/register")
+    public ResponseEntity<Object> register(@RequestBody UserDTO user) {
         try{
-            userService.registerUser(user);
-            return ResponseEntity.status(HttpStatus.CREATED).body(user);
+            User newUser = userService.registerUser(user);
+            return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
         }
         catch (Exception e){
             logger.error(e.getMessage());

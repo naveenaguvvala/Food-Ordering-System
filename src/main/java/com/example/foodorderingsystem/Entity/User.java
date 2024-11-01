@@ -16,6 +16,9 @@ import java.util.Date;
 @AllArgsConstructor
 @Entity
 @EntityListeners(AuditingEntityListener.class)
+@Table(name = "user", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"userName", "password"})
+})
 public class User {
 
     @Id
@@ -25,6 +28,9 @@ public class User {
 
     @Column(nullable = false)
     private String userName;
+
+    @Column(nullable = false)
+    private String password;
 
     private int resId; // If the user is Restaurant Owner - Can be improved
 

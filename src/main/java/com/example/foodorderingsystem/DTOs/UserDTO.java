@@ -7,11 +7,12 @@ import lombok.Setter;
 @Getter
 @Setter
 public class UserDTO {
-    private int userId;
 
     private String userName;
 
-    private int resId;
+    private String password;
 
-    private Roles role;
+//    private int resId;
+
+//    private Roles role;
 }
